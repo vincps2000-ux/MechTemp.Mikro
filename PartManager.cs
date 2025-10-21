@@ -97,6 +97,25 @@ namespace Mechapp
             return null;
         }
 
+        // Get the part definition from Parts.txt by name
+        public static JsonNode? GetPartDefinition(string partName)
+        {
+            if (string.IsNullOrEmpty(partName) || !File.Exists(_partsFile))
+                return null;
+            string json = File.ReadAllText(_partsFile);
+            var arr = JsonNode.Parse(json)?.AsArray();
+            if (arr != null)
+            {
+                foreach (var item in arr)
+                {
+                    var name = item?["name"]?.ToString();
+                    if (name != null && string.Equals(name, partName, System.StringComparison.OrdinalIgnoreCase))
+                        return item;
+                }
+            }
+            return null;
+        }
+
         public static List<string> GetAvailableParts()
         {
             if (_parts != null)
@@ -118,6 +137,23 @@ namespace Mechapp
             }
             _parts = result;
             return _parts;
+        }
+
+        // Returns the list of properties that should be displayed for a given part type
+        public static List<string> GetPartProperties(string partType)
+        {
+            var properties = new List<string>();
+            
+            // Add specific properties based on part type
+            switch (partType.ToLower())
+            {
+                case "frame":
+                    properties.Add("Scale");
+                    break;
+                // Add cases for other part types here
+            }
+
+            return properties;
         }
     }
 }

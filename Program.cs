@@ -76,7 +76,21 @@ namespace Mechapp
             {
                 string name = parts[i]["name"]?.ToString() ?? "Unnamed";
                 string partID = parts[i]["PartID"]?.ToString() ?? "?";
-                Console.WriteLine($"{i + 1}. {name} (PartID: {partID})");
+                string displayText = $"{i + 1}. {name} (PartID: {partID})";
+
+                // Get and display the part's properties
+                string? partType = PartManager.GetTypeForName(name);
+                if (partType != null)
+                {
+                    var properties = PartManager.GetPartProperties(partType);
+                    foreach (var prop in properties)
+                    {
+                        var propValue = parts[i][prop]?.ToString() ?? "N/A";
+                        displayText += $" | {prop}: {propValue}";
+                    }
+                }
+                
+                Console.WriteLine(displayText);
             }
 
             // Only show Add Part option if allowed
@@ -161,7 +175,25 @@ namespace Mechapp
                         Console.WriteLine("Select a part to add:");
                         for (int i = 0; i < availableParts.Count; i++)
                         {
-                            Console.WriteLine($"{i + 1}. {availableParts[i]}");
+                            string partName = availableParts[i];
+                            var partDef = PartManager.GetPartDefinition(partName);
+                            string displayText = $"{i + 1}. {partName}";
+                            
+                            if (partDef != null)
+                            {
+                                string? partType = partDef["type"]?.ToString();
+                                if (partType != null)
+                                {
+                                    var properties = PartManager.GetPartProperties(partType);
+                                    foreach (var prop in properties)
+                                    {
+                                        var propValue = partDef[prop]?.ToString() ?? "N/A";
+                                        displayText += $" | {prop}: {propValue}";
+                                    }
+                                }
+                            }
+                            
+                            Console.WriteLine(displayText);
                         }
                         Console.Write("Enter number: ");
                         string partInput = Console.ReadLine() ?? "";

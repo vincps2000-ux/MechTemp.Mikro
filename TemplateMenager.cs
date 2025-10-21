@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Nodes;
+using Mechapp;
 namespace Templates
 {
     class Templatemanager
     {
-        JsonObject managedTemplate;
+        JsonObject managedTemplate = new JsonObject();
         Int32 IDCounter = 0;
         /// <summary>
         /// Creates the Blank base Template
@@ -69,6 +70,25 @@ namespace Templates
             IDCounter++;
             partToAdd["PartID"] = IDCounter;
 
+            // Copy properties from Parts.txt definition
+            string? partName = partToAdd["name"]?.ToString();
+            if (partName != null)
+            {
+                var definition = PartManager.GetPartDefinition(partName);
+                if (definition != null)
+                {
+                    foreach (var prop in PartManager.GetPartProperties(definition["type"]?.ToString() ?? ""))
+                    {
+                        if (definition[prop] != null)
+                        {
+                            // Create a new JsonNode with the value instead of reusing the existing one
+                            string valueStr = definition[prop]!.ToString();
+                            partToAdd[prop] = JsonValue.Create(valueStr);
+                        }
+                    }
+                }
+            }
+
             // If no parentPartID specified, add directly to root
             if (parentPartID == null)
             {
@@ -78,7 +98,7 @@ namespace Templates
             }
 
             // Find the parent part by PartID
-            JsonObject targetParent = FindPartByID(managedTemplate, parentPartID);
+            JsonObject? targetParent = FindPartByID(managedTemplate, parentPartID);
 
             if (targetParent != null)
             {
@@ -88,8 +108,11 @@ namespace Templates
                     targetParent["children"] = new JsonArray();
                 }
 
-                // Add to children array
-                targetParent["children"].AsArray().Add(partToAdd);
+                var children = targetParent["children"]?.AsArray();
+                if (children != null)
+                {
+                    children.Add(partToAdd);
+                }
             }
             else
             {
@@ -104,7 +127,7 @@ namespace Templates
         /// <param name="obj"></param>
         /// <param name="partID"></param>
         /// <returns></returns>
-        private JsonObject FindPartByID(JsonObject obj, string partID)
+        private JsonObject? FindPartByID(JsonObject obj, string partID)
         {
             // Check if current object has the PartID
             if (obj["PartID"]?.ToString() == partID)
