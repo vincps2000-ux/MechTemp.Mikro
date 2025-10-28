@@ -9,6 +9,7 @@ This project is a C# console application for interactively building hierarchical
 - **Template Management:** The `Templatemanager` class manages the current mech template, allowing parts to be added at any level, with logic to restrict additions based on layer rules.
 - **Parts Data:** All available parts (with optional types) are stored in `Parts.txt` as a JSON array.
  - **Stats Display:** The UI shows a recalculated weight limit each navigation step. The weight limit is calculated by `StatCalc.GetWeightLimit()` based on the template's root frame.
+- **Scale Display:** The UI header shows the current node's Scale, and each listed part shows its Scale alongside its name.
  - **Category-driven Selection:** Categories are read from `Parts.txt` via `PartManager.GetAllCategories()` so the category list shown to the user matches the source data exactly.
  - **Frame Root-only Rule:** Frames are enforced as root-only in the UI; when adding a child under a parent, the "Frame" category is filtered out.
 
@@ -18,6 +19,7 @@ This project is a C# console application for interactively building hierarchical
 - `PartManager.cs`: Loads available parts from `Parts.txt` and provides filtering by type.
  - `StatCalc.cs`: Calculates template-level stats (currently weight limit) from the JSON template.
  - `PartManager.cs`: Loads available parts from `Parts.txt`, provides filtering by type, and can list all categories.
+ - `PartManager.cs` also provides Scale helpers and a `ChooseScale(parentScale)` prompt used only for parts that lack a predefined Scale in `Parts.txt`.
 - `Parts.txt`: JSON file listing all possible parts and their types (e.g., Frame, Weapon, etc.).
 
 ## Usage
@@ -25,6 +27,7 @@ This project is a C# console application for interactively building hierarchical
 - The user can add parts, but only if the current layer allows it (e.g., only one frame at the root).
 - The "Add New Part" option is only shown when allowed by the template rules.
 - The navigation UI allows moving up and down the part hierarchy.
+ - Scale rules: a child part's Scale must be the same or smaller than its parent's Scale. Frames have Scale predefined in `Parts.txt` and will not prompt for Scale.
 
 ## Extensibility
 - The part system is data-driven; new parts or types can be added by editing `Parts.txt`.
@@ -36,6 +39,7 @@ This project is a C# console application for interactively building hierarchical
 - All part and template logic is separated from the UI for maintainability.
 - The `CanAdd()` method in `Templatemanager` enforces layer-specific rules for part addition, and the UI respects these rules.
  - The UI now recalculates stats each step using `StatCalc` and displays a weight limit. The `PartManager` exposes `GetAllCategories()` and `GetTypeForName()` to support category-driven selection.
+ - The scale system ensures frames use predefined scales and only prompts for Scale when it's not in the part definition; child parts cannot exceed the parent's Scale.
 
 ---
 This file is intended to help future AI agents or developers quickly understand the project structure and goals.

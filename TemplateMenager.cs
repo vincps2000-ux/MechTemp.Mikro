@@ -66,25 +66,64 @@ namespace Templates
         /// <returns></returns>
     public Int32 AddPart(JsonObject partToAdd, string? parentPartID = null)
         {
+            // Resolve parent scale (if any)
+            string? parentScale = null;
+            if (parentPartID != null)
+            {
+                var parent = FindPartByID(managedTemplate, parentPartID);
+                if (parent != null)
+                {
+                    parentScale = parent["Scale"]?.ToString();
+                }
+            }
+
+            // Load definition and pre-populate known properties (but handle Scale with rules below)
+            string? partName = partToAdd["name"]?.ToString();
+            var definition = partName != null ? PartManager.GetPartDefinition(partName) : null;
+
+            // Determine desired scale:
+            // - If definition provides Scale (e.g., Frame), use it without prompting
+            // - Else prompt the user to choose a valid scale (filtered by parent)
+            string? desiredScale = definition? ["Scale"]?.ToString();
+            if (string.IsNullOrEmpty(desiredScale))
+            {
+                desiredScale = PartManager.ChooseScale(parentScale);
+                if (string.IsNullOrEmpty(desiredScale))
+                {
+                    Console.WriteLine("Invalid scale selection!");
+                    return -1;
+                }
+            }
+
+            // Enforce: part scale must be <= parent scale (if parent exists)
+            if (!string.IsNullOrEmpty(parentScale))
+            {
+                int childLevel = PartManager.GetScaleLevel(desiredScale!);
+                int parentLevel = PartManager.GetScaleLevel(parentScale!);
+                if (childLevel > parentLevel)
+                {
+                    Console.WriteLine($"Cannot add part with Scale {desiredScale} larger than parent Scale {parentScale}.");
+                    return -1;
+                }
+            }
+
+            // Set the chosen/defined scale on the part
+            partToAdd["Scale"] = JsonValue.Create(desiredScale);
+
             // Increment the counter and assign PartID
             IDCounter++;
             partToAdd["PartID"] = IDCounter;
 
-            // Copy properties from Parts.txt definition
-            string? partName = partToAdd["name"]?.ToString();
-            if (partName != null)
+            // Copy additional properties from definition (won't override chosen Scale if definition lacks it)
+            if (definition != null)
             {
-                var definition = PartManager.GetPartDefinition(partName);
-                if (definition != null)
+                foreach (var prop in PartManager.GetPartProperties(definition["type"]?.ToString() ?? ""))
                 {
-                    foreach (var prop in PartManager.GetPartProperties(definition["type"]?.ToString() ?? ""))
+                    if (definition[prop] != null)
                     {
-                        if (definition[prop] != null)
-                        {
-                            // Create a new JsonNode with the value instead of reusing the existing one
-                            string valueStr = definition[prop]!.ToString();
-                            partToAdd[prop] = JsonValue.Create(valueStr);
-                        }
+                        // Create a new JsonNode with the value instead of reusing the existing one
+                        string valueStr = definition[prop]!.ToString();
+                        partToAdd[prop] = JsonValue.Create(valueStr);
                     }
                 }
             }

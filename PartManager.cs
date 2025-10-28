@@ -10,6 +10,42 @@ namespace Mechapp
     {
         private static List<string>? _parts;
         private static string _partsFile = "Parts.txt";
+        private static readonly string[] ValidScales = new[] { "Personal(1)", "Vehicle(2)", "House(3)", "Building(4)" };
+
+        public static string? ChooseScale(string? parentScale = null)
+        {
+            // If parent scale exists, only show scales of same or smaller size
+            var availableScales = ValidScales;
+            if (parentScale != null)
+            {
+                int parentLevel = GetScaleLevel(parentScale);
+                availableScales = ValidScales.Where(s => GetScaleLevel(s) <= parentLevel).ToArray();
+            }
+
+            Console.WriteLine("\nAvailable Scales:");
+            for (int i = 0; i < availableScales.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {availableScales[i]}");
+            }
+
+            Console.Write("Choose scale (enter number): ");
+            if (int.TryParse(Console.ReadLine(), out int choice) && choice > 0 && choice <= availableScales.Length)
+            {
+                return availableScales[choice - 1];
+            }
+            return null;
+        }
+
+        public static int GetScaleLevel(string scale)
+        {
+            // Extract the number from the scale string (e.g., "Personal(1)" -> 1)
+            var match = System.Text.RegularExpressions.Regex.Match(scale, @"\((\d+)\)");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int level))
+            {
+                return level;
+            }
+            return 0;
+        }
 
         // Returns all part names of a given type (case-insensitive)
         public static List<string> GetPartsByType(string type)
@@ -144,11 +180,14 @@ namespace Mechapp
         {
             var properties = new List<string>();
             
-            // Add specific properties based on part type
+            // Scale is a common property for all parts
+            properties.Add("Scale");
+            
+            // Add additional specific properties based on part type
             switch (partType.ToLower())
             {
                 case "frame":
-                    properties.Add("Scale");
+                    // Frame might have additional specific properties in the future
                     break;
                 // Add cases for other part types here
             }

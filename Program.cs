@@ -57,11 +57,18 @@ namespace Mechapp
             Console.Clear();
             // Recalculate stats and display weight limit
             int weightLimit = 0;
+            string currentScale = "";
             if (_manager != null)
             {
                 weightLimit = StatCalc.GetWeightLimit(_manager.GetTemplate());
+                // Get scale of current object if it exists
+                var scale = currentObject["Scale"]?.ToString();
+                if (!string.IsNullOrEmpty(scale))
+                {
+                    currentScale = scale;
+                }
             }
-            Console.WriteLine($"=== JSON Navigator ===    Weight limit: {weightLimit}");
+            Console.WriteLine($"=== JSON Navigator ===    Weight limit: {weightLimit}    Scale: {currentScale}");
 
             // Get all parts at current level
             List<JsonObject> parts = GetChildParts(currentObject);
