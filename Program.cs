@@ -12,6 +12,9 @@ namespace Mechapp
         // Configurable action keys
         public const char GoUpKey = 'U'; // Change this letter to change the Go Up key
         public const char AddPartKey = 'A'; // Change this letter to change the Add New Part key
+        public const char SaveKey = 'S'; // Key for saving template
+        public const char LoadKey = 'L'; // Key for loading template
+        
         static void Main(string[] args)
         {
             ConsoleMechTemplateBuilder();
@@ -22,7 +25,32 @@ namespace Mechapp
             Templatemanager manager = new Templatemanager();
             _manager = manager;
             Console.WriteLine("Welcome in TemplateBuilder:");
-            manager.CreateBlankTemplate();
+            
+            // Ask user if they want to load an existing template
+            Console.WriteLine("\nDo you want to:");
+            Console.WriteLine("1. Create a new template");
+            Console.WriteLine("2. Load an existing template");
+            Console.Write("Enter choice (1 or 2): ");
+            string choice = Console.ReadLine() ?? "1";
+            
+            if (choice == "2")
+            {
+                var loadedTemplate = ShowLoadTemplateMenu();
+                if (loadedTemplate != null)
+                {
+                    manager.LoadTemplate(loadedTemplate);
+                }
+                else
+                {
+                    Console.WriteLine("Starting with blank template instead.");
+                    manager.CreateBlankTemplate();
+                }
+            }
+            else
+            {
+                manager.CreateBlankTemplate();
+            }
+            
             NavigateJSON(manager.GetTemplate());
             return true;
         }
@@ -108,6 +136,13 @@ namespace Mechapp
                 Console.WriteLine($"{AddPartKey}. [Add New Part]");
             }
 
+            // Show Save and Load options (only at root level)
+            if (navigationStack.Count == 0)
+            {
+                Console.WriteLine($"{SaveKey}. [Save Template]");
+                Console.WriteLine($"{LoadKey}. [Load Template]");
+            }
+
             Console.WriteLine("\nEnter number to navigate" + (canAdd ? ", letter for action" : "") + ", or 'q' to quit: ");
             string input = Console.ReadLine()!;
 
@@ -121,6 +156,29 @@ namespace Mechapp
             if (navigationStack.Count > 0 && input != null && input.Length == 1 && char.ToUpper(input[0]) == GoUpKey)
             {
                 currentObject = navigationStack.Pop();
+            }
+            // Handle Save Template (only at root)
+            else if (navigationStack.Count == 0 && input != null && input.Length == 1 && char.ToUpper(input[0]) == SaveKey)
+            {
+                if (_manager != null)
+                {
+                    ShowSaveTemplateMenu();
+                }
+            }
+            // Handle Load Template (only at root)
+            else if (navigationStack.Count == 0 && input != null && input.Length == 1 && char.ToUpper(input[0]) == LoadKey)
+            {
+                if (_manager != null)
+                {
+                    var loadedTemplate = ShowLoadTemplateMenu();
+                    if (loadedTemplate != null)
+                    {
+                        _manager.LoadTemplate(loadedTemplate);
+                        // Reset to root after loading
+                        currentObject = _manager.GetTemplate();
+                        navigationStack.Clear();
+                    }
+                }
             }
             // Handle Add New Part only if allowed
             else if (canAdd && input != null && input.Length == 1 && char.ToUpper(input[0]) == AddPartKey)
@@ -261,6 +319,82 @@ namespace Mechapp
             }
             return parts;
         }
+
+        static void ShowSaveTemplateMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("=== Save Template ===");
+            Console.Write("Enter filename (without .json extension): ");
+            string fileName = Console.ReadLine() ?? "";
+            
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                Console.WriteLine("Invalid filename!");
+                Console.ReadKey();
+                return;
+            }
+
+            if (_manager != null)
+            {
+                bool success = PersistencyManager.SaveTemplate(_manager.GetTemplate(), fileName);
+                if (success)
+                {
+                    Console.WriteLine("Template saved successfully!");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to save template.");
+                }
+            }
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+
+        static JsonObject? ShowLoadTemplateMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("=== Load Template ===");
+            
+            var savedTemplates = PersistencyManager.GetSavedTemplates();
+            
+            if (savedTemplates.Length == 0)
+            {
+                Console.WriteLine("No saved templates found.");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                return null;
+            }
+
+            Console.WriteLine("Available templates:");
+            for (int i = 0; i < savedTemplates.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {savedTemplates[i]}");
+            }
+            
+            Console.Write("\nEnter template number to load (or 0 to cancel): ");
+            string input = Console.ReadLine() ?? "";
+            
+            if (int.TryParse(input, out int choice) && choice > 0 && choice <= savedTemplates.Length)
+            {
+                var loaded = PersistencyManager.LoadTemplate(savedTemplates[choice - 1]);
+                if (loaded != null)
+                {
+                    Console.WriteLine("Template loaded successfully!");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                    return loaded;
+                }
+                else
+                {
+                    Console.WriteLine("Failed to load template.");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                }
+            }
+            
+            return null;
+        }
     }
 }
+
 

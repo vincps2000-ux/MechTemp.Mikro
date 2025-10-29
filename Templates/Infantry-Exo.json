@@ -1,0 +1,31 @@
+{
+  "Part_1": {
+    "name": "Exosuit-Frame",
+    "Scale": "Personal(1)",
+    "PartID": 1,
+    "children": [
+      {
+        "name": "Optical Sensor",
+        "Scale": "Personal(1)",
+        "PartID": 2
+      },
+      {
+        "name": "Gun",
+        "Scale": "Personal(1)",
+        "PartID": 3,
+        "children": [
+          {
+            "name": "Thermal Sensor",
+            "Scale": "Personal(1)",
+            "PartID": 5
+          }
+        ]
+      },
+      {
+        "name": "Missile",
+        "Scale": "Personal(1)",
+        "PartID": 4
+      }
+    ]
+  }
+}

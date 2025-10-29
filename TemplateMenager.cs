@@ -28,6 +28,59 @@ namespace Templates
         }
 
         /// <summary>
+        /// Loads a template and updates the IDCounter based on existing PartIDs
+        /// </summary>
+        /// <param name="template">The template to load</param>
+        public void LoadTemplate(JsonObject template)
+        {
+            managedTemplate = template;
+            // Update IDCounter to be higher than any existing PartID
+            IDCounter = GetMaxPartID(managedTemplate);
+        }
+
+        /// <summary>
+        /// Recursively finds the maximum PartID in the template
+        /// </summary>
+        /// <param name="obj">The JsonObject to search</param>
+        /// <returns>The maximum PartID found</returns>
+        private int GetMaxPartID(JsonObject obj)
+        {
+            int maxID = 0;
+
+            // Check current object's PartID
+            if (obj["PartID"] != null && int.TryParse(obj["PartID"]?.ToString(), out int currentID))
+            {
+                if (currentID > maxID)
+                    maxID = currentID;
+            }
+
+            // Search through all properties
+            foreach (var property in obj)
+            {
+                if (property.Value is JsonObject childObj)
+                {
+                    int childMax = GetMaxPartID(childObj);
+                    if (childMax > maxID)
+                        maxID = childMax;
+                }
+                else if (property.Value is JsonArray array)
+                {
+                    foreach (var item in array)
+                    {
+                        if (item is JsonObject arrayObj)
+                        {
+                            int arrayMax = GetMaxPartID(arrayObj);
+                            if (arrayMax > maxID)
+                                maxID = arrayMax;
+                        }
+                    }
+                }
+            }
+
+            return maxID;
+        }
+
+        /// <summary>
         /// Returns true if a part can be added to the specified layer (by PartID). For root, only one frame allowed.
         /// </summary>
         /// <param name="parentPartID">null for root, or PartID for child layer</param>

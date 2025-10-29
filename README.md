@@ -12,6 +12,10 @@ A C# console app for interactively building hierarchical mech templates from a p
   - Frames get their Scale from `Parts.txt` automatically (no prompt)
   - Non-frame parts are prompted to choose a Scale
   - A child part's Scale must be the same or smaller than its parent's Scale
+- **Save and Load Templates**
+  - Save your templates to the `Templates` folder
+  - Load existing templates at startup or during navigation
+  - Templates stored as readable JSON files
 
 ## Scale System
 - Supported scales (smallest → largest):
@@ -41,6 +45,8 @@ A C# console app for interactively building hierarchical mech templates from a p
 - Type a number: Navigate into that part
 - U: Go up
 - A: Add new part (only shown when allowed)
+- S: Save template (only at root level)
+- L: Load template (only at root level)
 - q: Quit
 
 ## Run
@@ -75,10 +81,13 @@ Notes:
 - `TemplateMenager.cs` – Template management, rules (root frame, scale enforcement)
 - `PartManager.cs` – Parts catalog loading, category lists, property metadata, scale helpers
 - `StatCalc.cs` – Weight limit derivation from root frame
+- `PersistencyManager.cs` – Template save/load functionality
 - `Parts.txt` – Parts data source
+- `Templates/` – Folder where saved templates are stored
 
 ## Roadmap Ideas
-- Save/load templates to disk
 - Additional stats derived from scales and part types
 - More part-type-specific properties and validation rules
 - Richer UI (colors, paging) or a GUI/web front-end
+- Template export to different formats
+- Template versioning and migration
