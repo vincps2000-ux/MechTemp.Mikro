@@ -134,13 +134,22 @@ namespace Templates
             string? partName = partToAdd["name"]?.ToString();
             var definition = partName != null ? PartManager.GetPartDefinition(partName) : null;
 
+            // Determine Min/Max Scale constraints (if present)
+            int? minScaleLevel = null;
+            int maxScaleLevel = 4; // default global max
+            if (!string.IsNullOrEmpty(partName))
+            {
+                minScaleLevel = PartManager.GetMinScaleLevelForPart(partName!);
+                maxScaleLevel = PartManager.GetMaxScaleLevelForPart(partName!);
+            }
+
             // Determine desired scale:
             // - If definition provides Scale (e.g., Frame), use it without prompting
             // - Else prompt the user to choose a valid scale (filtered by parent)
             string? desiredScale = definition? ["Scale"]?.ToString();
             if (string.IsNullOrEmpty(desiredScale))
             {
-                desiredScale = PartManager.ChooseScale(parentScale);
+                desiredScale = PartManager.ChooseScale(parentScale, minScaleLevel, maxScaleLevel);
                 if (string.IsNullOrEmpty(desiredScale))
                 {
                     Console.WriteLine("Invalid scale selection!");
@@ -160,8 +169,35 @@ namespace Templates
                 }
             }
 
+            // Enforce: part scale must be >= MinScale (if defined)
+            if (minScaleLevel.HasValue)
+            {
+                int childLevel = PartManager.GetScaleLevel(desiredScale!);
+                if (childLevel < minScaleLevel.Value)
+                {
+                    Console.WriteLine($"Cannot add part with Scale {desiredScale} below its MinScale ({minScaleLevel.Value}).");
+                    return -1;
+                }
+            }
+
+            // Enforce: part scale must be <= MaxScale
+            if (!string.IsNullOrEmpty(desiredScale))
+            {
+                int childLevel = PartManager.GetScaleLevel(desiredScale!);
+                if (childLevel > maxScaleLevel)
+                {
+                    Console.WriteLine($"Cannot add part with Scale {desiredScale} above its MaxScale ({maxScaleLevel}).");
+                    return -1;
+                }
+            }
+
             // Set the chosen/defined scale on the part
             partToAdd["Scale"] = JsonValue.Create(desiredScale);
+            // Store MinScale/MaxScale on part for visibility (optional)
+            if (minScaleLevel.HasValue)
+                partToAdd["MinScale"] = JsonValue.Create(minScaleLevel.Value.ToString());
+            if (maxScaleLevel > 0)
+                partToAdd["MaxScale"] = JsonValue.Create(maxScaleLevel.ToString());
 
             // Increment the counter and assign PartID
             IDCounter++;

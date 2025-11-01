@@ -12,15 +12,14 @@ namespace Mechapp
         private static string _partsFile = "Parts.txt";
         private static readonly string[] ValidScales = new[] { "Personal(1)", "Vehicle(2)", "House(3)", "Building(4)" };
 
-        public static string? ChooseScale(string? parentScale = null)
+    public static string? ChooseScale(string? parentScale = null, int? minScaleLevel = null, int? maxScaleLevel = null)
         {
             // If parent scale exists, only show scales of same or smaller size
-            var availableScales = ValidScales;
-            if (parentScale != null)
-            {
-                int parentLevel = GetScaleLevel(parentScale);
-                availableScales = ValidScales.Where(s => GetScaleLevel(s) <= parentLevel).ToArray();
-            }
+            var availableScales = ValidScales
+        .Where(s => parentScale == null || GetScaleLevel(s) <= GetScaleLevel(parentScale))
+        .Where(s => !minScaleLevel.HasValue || GetScaleLevel(s) >= minScaleLevel.Value)
+        .Where(s => !maxScaleLevel.HasValue || GetScaleLevel(s) <= maxScaleLevel.Value)
+                .ToArray();
 
             Console.WriteLine("\nAvailable Scales:");
             for (int i = 0; i < availableScales.Length; i++)
@@ -45,6 +44,64 @@ namespace Mechapp
                 return level;
             }
             return 0;
+        }
+
+        /// <summary>
+        /// Returns MinScale level (1..N) for a part name, if specified in Parts.txt.
+        /// Accepts either numeric ("3") or descriptor ("House(3)") formats.
+        /// </summary>
+        public static int? GetMinScaleLevelForPart(string partName)
+        {
+            var def = GetPartDefinition(partName);
+            if (def == null) return null;
+
+            var minScaleNode = def["MinScale"];
+            if (minScaleNode == null) return null;
+
+            var raw = minScaleNode.ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return null;
+
+            // Try direct int first
+            if (int.TryParse(raw, out int lvl)) return lvl;
+
+            // Try descriptor parsing e.g., "House(3)" or any string that includes (number)
+            var match = System.Text.RegularExpressions.Regex.Match(raw, @"\((\d+)\)");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int lvl2)) return lvl2;
+
+            // As a last resort, if the raw looks like a known scale label, use GetScaleLevel
+            int lvl3 = GetScaleLevel(raw);
+            return lvl3 > 0 ? lvl3 : null;
+        }
+
+        /// <summary>
+        /// Returns MaxScale level (1..N) for a part name, if specified in Parts.txt.
+        /// If not specified, defaults to 4 as the global maximum.
+        /// Accepts either numeric ("4") or descriptor ("Building(4)") formats.
+        /// </summary>
+        public static int GetMaxScaleLevelForPart(string partName)
+        {
+            var def = GetPartDefinition(partName);
+            if (def == null)
+            {
+                return 4; // default global max
+            }
+
+            var maxScaleNode = def["MaxScale"];
+            if (maxScaleNode == null)
+            {
+                return 4; // default if missing
+            }
+
+            var raw = maxScaleNode.ToString();
+            if (string.IsNullOrWhiteSpace(raw)) return 4;
+
+            if (int.TryParse(raw, out int lvl)) return lvl;
+
+            var match = System.Text.RegularExpressions.Regex.Match(raw, @"\((\d+)\)");
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int lvl2)) return lvl2;
+
+            int lvl3 = GetScaleLevel(raw);
+            return lvl3 > 0 ? lvl3 : 4;
         }
 
         // Returns all part names of a given type (case-insensitive)
@@ -182,6 +239,10 @@ namespace Mechapp
             
             // Scale is a common property for all parts
             properties.Add("Scale");
+            // Include MinScale when present in definitions
+            properties.Add("MinScale");
+            // Include MaxScale for visibility (will default logically to 4 if omitted)
+            properties.Add("MaxScale");
             
             // Add additional specific properties based on part type
             switch (partType.ToLower())

@@ -28,9 +28,23 @@ namespace Mechapp
                 if (prop.Value is JsonObject obj)
                 {
                     string? name = obj["name"]?.ToString();
-                    if (name != null && name.ToLower().Contains("frame"))
+                    if (!string.IsNullOrEmpty(name))
                     {
-                        return WeightForFrame(name);
+                        // Prefer authoritative type/category from Parts.txt over name substring matching
+                        var type = PartManager.GetTypeForName(name);
+                        if (type != null && type.Equals("Frame", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Try lookup from Parts.txt definition first (source of truth)
+                            var def = PartManager.GetPartDefinition(name);
+                            if (def != null)
+                            {
+                                var wlStr = def["WeightLimit"]?.ToString();
+                                if (int.TryParse(wlStr, out int limitFromParts))
+                                {
+                                    return limitFromParts;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -39,16 +53,5 @@ namespace Mechapp
             return 0;
         }
 
-        static int WeightForFrame(string frameName)
-        {
-            var n = frameName.ToLower();
-            if (n.Contains("exosuit")) return 2000;
-            if (n.Contains("demimech")) return 1500;
-            if (n.Contains("light")) return 800;
-            if (n.Contains("medium")) return 1200;
-            if (n.Contains("heavy")) return 1800;
-            if (n.Contains("colossal")) return 3000;
-            return 1000; // fallback
-        }
     }
 }
