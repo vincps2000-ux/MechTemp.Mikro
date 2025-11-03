@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Templates;
 using System.Collections.Generic;
 using System.Linq;
+using Mechapp.UI;
 namespace Mechapp
 {
     class Program
@@ -17,7 +18,34 @@ namespace Mechapp
         
         static void Main(string[] args)
         {
-            ConsoleMechTemplateBuilder();
+            // New entry flow: Building selection first, then Design Bureau opens the template builder
+            RunFromDistrictDirectory();
+        }
+
+        static void RunFromDistrictDirectory()
+        {
+            while (true)
+            {
+                var selected = BuildingSelector.Show();
+                if (selected == null)
+                {
+                    // Quit selected
+                    break;
+                }
+
+                if (selected.Equals("Design Bureau", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    // Enter the existing Template Builder flow
+                    ConsoleMechTemplateBuilder();
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine($"{selected} — Feature to be added later.");
+                    Console.WriteLine("Press any key to return to the District Directory...");
+                    Console.ReadKey(true);
+                }
+            }
         }
 
         static bool ConsoleMechTemplateBuilder()

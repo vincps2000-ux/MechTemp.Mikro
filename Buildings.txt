@@ -1,0 +1,7 @@
+[
+  "Design Bureau",
+  "Mech Factory",
+  "Research Lab",
+  "Sales Office",
+  "Operations Office"
+]
