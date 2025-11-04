@@ -1,0 +1,10 @@
+[
+  "Exosuit-Frame",
+  "Gun",
+  "Joint",
+  "Connector",
+  "Hand",
+  "Foot",
+  "Turret",
+  "Sword"
+]

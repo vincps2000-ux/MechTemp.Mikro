@@ -19,6 +19,7 @@ namespace Mechapp
         static void Main(string[] args)
         {
             // New entry flow: Building selection first, then Design Bureau opens the template builder
+            ResearchManager.ApplyDefaultsOnStart();
             RunFromDistrictDirectory();
         }
 
@@ -37,6 +38,10 @@ namespace Mechapp
                 {
                     // Enter the existing Template Builder flow
                     ConsoleMechTemplateBuilder();
+                }
+                else if (selected.Equals("Research Lab", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    ResearchLab.Run();
                 }
                 else
                 {
@@ -222,6 +227,14 @@ namespace Mechapp
                     if (parentPartID == null)
                     {
                         availableParts = PartManager.GetPartsByType("Frame");
+                        // Research gating for Frames
+                        availableParts = availableParts.Where(ResearchManager.IsResearched).ToList();
+                        if (availableParts.Count == 0)
+                        {
+                            Console.WriteLine("No researched Frames available. Visit the Research Lab first.");
+                            Console.ReadKey();
+                            return Tuple.Create(currentObject, navigationStack);
+                        }
                     }
                     else
                     {
@@ -257,6 +270,14 @@ namespace Mechapp
                         }
                         string selectedCategory = filtered[catIndex - 1];
                         availableParts = PartManager.GetPartsByCategory(selectedCategory);
+                        // Research gating for category parts
+                        availableParts = availableParts.Where(ResearchManager.IsResearched).ToList();
+                        if (availableParts.Count == 0)
+                        {
+                            Console.WriteLine("No researched parts in this category. Visit the Research Lab first.");
+                            Console.ReadKey();
+                            return Tuple.Create(currentObject, navigationStack);
+                        }
                     }
                     if (availableParts.Count == 0)
                     {
