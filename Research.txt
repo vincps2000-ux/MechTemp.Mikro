@@ -1,9 +1,3 @@
 [
-  "Exosuit-Frame",
-  "Gun",
-  "Joint",
-  "Connector",
-  "Hand",
-  "Foot",
-  "Turret"
+  "Exosuit-Frame"
 ]
