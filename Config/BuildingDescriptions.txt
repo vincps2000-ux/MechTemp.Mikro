@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "Design Bureau",
+    "Description": "Create and modify mech templates with an interactive builder"
+  },
+  {
+    "Name": "Mech Factory",
+    "Description": "Assemble mechs from your saved templates"
+  },
+  {
+    "Name": "Research Lab",
+    "Description": "Research new technologies and unlock advanced components"
+  },
+  {
+    "Name": "Sales Office",
+    "Description": "Manage contracts and sell your mechs"
+  },
+  {
+    "Name": "Operations Office",
+    "Description": "General transformational Work inside the Business"
+  }
+]

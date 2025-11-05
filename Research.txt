@@ -5,6 +5,5 @@
   "Connector",
   "Hand",
   "Foot",
-  "Turret",
-  "Sword"
+  "Turret"
 ]

@@ -6,9 +6,16 @@ using System.Text.Json.Nodes;
 
 namespace Mechapp
 {
+    public class BuildingInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
+
     public static class BuildingManager
     {
         private static readonly string _file = "Buildings.txt";
+        private static readonly string _descriptionsFile = "Config/BuildingDescriptions.txt";
         private static readonly List<string> _fallback = new()
         {
             "Design Bureau",
@@ -43,6 +50,37 @@ namespace Mechapp
             catch
             {
                 return new List<string>(_fallback);
+            }
+        }
+
+        public static List<BuildingInfo> GetBuildingsWithDescriptions()
+        {
+            try
+            {
+                if (!File.Exists(_descriptionsFile))
+                {
+                    // Fallback to basic list without descriptions
+                    var buildings = GetBuildings();
+                    return buildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
+                }
+
+                var json = File.ReadAllText(_descriptionsFile);
+                var buildingList = JsonSerializer.Deserialize<List<BuildingInfo>>(json);
+                
+                if (buildingList != null && buildingList.Count > 0)
+                {
+                    return buildingList;
+                }
+
+                // Fallback if deserialization fails
+                var fallbackBuildings = GetBuildings();
+                return fallbackBuildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
+            }
+            catch
+            {
+                // Fallback on error
+                var fallbackBuildings = GetBuildings();
+                return fallbackBuildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
             }
         }
     }

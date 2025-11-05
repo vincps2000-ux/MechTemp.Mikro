@@ -13,13 +13,18 @@ namespace Mechapp.UI
                 Console.WriteLine("=== District Directory ===");
                 Console.WriteLine("Select a building (or 'q' to quit):\n");
 
-                var buildings = BuildingManager.GetBuildings();
+                var buildings = BuildingManager.GetBuildingsWithDescriptions();
                 for (int i = 0; i < buildings.Count; i++)
                 {
-                    Console.WriteLine($"{i + 1}. {buildings[i]}");
+                    Console.WriteLine($"{i + 1}. {buildings[i].Name}");
+                    if (!string.IsNullOrWhiteSpace(buildings[i].Description))
+                    {
+                        Console.WriteLine($"   {buildings[i].Description}");
+                    }
+                    Console.WriteLine(); // Add blank line for readability
                 }
 
-                Console.Write("\nEnter choice: ");
+                Console.Write("Enter choice: ");
                 var input = Console.ReadLine() ?? string.Empty;
                 if (input.Trim().Equals("q", StringComparison.OrdinalIgnoreCase))
                 {
@@ -27,7 +32,7 @@ namespace Mechapp.UI
                 }
                 if (int.TryParse(input, out int idx) && idx >= 1 && idx <= buildings.Count)
                 {
-                    return buildings[idx - 1];
+                    return buildings[idx - 1].Name;
                 }
 
                 Console.WriteLine("Invalid selection. Press any key to try again...");
