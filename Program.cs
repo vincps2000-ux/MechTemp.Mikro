@@ -158,6 +158,13 @@ namespace Mechapp
                     }
                 }
                 
+                // Display Mounting if present (for non-Frame, non-extremity parts)
+                if (parts[i]["Mounting"] != null)
+                {
+                    string mountingValue = parts[i]["Mounting"]?.ToString() ?? "N/A";
+                    displayText += $" | Mounting: {mountingValue}";
+                }
+                
                 Console.WriteLine(displayText);
             }
 

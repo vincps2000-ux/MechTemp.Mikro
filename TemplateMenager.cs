@@ -199,6 +199,20 @@ namespace Templates
             if (maxScaleLevel > 0)
                 partToAdd["MaxScale"] = JsonValue.Create(maxScaleLevel.ToString());
 
+            // Determine mounting type for non-Frame, non-extremity parts
+            string? partType = definition?["type"]?.ToString();
+            if (!string.IsNullOrEmpty(partType) && 
+                !partType.Equals("Frame", StringComparison.OrdinalIgnoreCase) &&
+                !partType.Equals("extremity", StringComparison.OrdinalIgnoreCase))
+            {
+                // Ask user for mounting type (Internal or External)
+                string? mounting = ChooseMounting();
+                if (!string.IsNullOrEmpty(mounting))
+                {
+                    partToAdd["Mounting"] = JsonValue.Create(mounting);
+                }
+            }
+
             // Increment the counter and assign PartID
             IDCounter++;
             partToAdd["PartID"] = IDCounter;
@@ -247,6 +261,26 @@ namespace Templates
                 Console.WriteLine($"Parent with PartID '{parentPartID}' not found!");
             }
             return (IDCounter);
+        }
+
+        /// <summary>
+        /// Prompts the user to choose a mounting type (Internal or External)
+        /// </summary>
+        /// <returns>Selected mounting type or null if invalid</returns>
+        private string? ChooseMounting()
+        {
+            Console.WriteLine("\nMounting Type:");
+            Console.WriteLine("1. Internal");
+            Console.WriteLine("2. External");
+            Console.Write("Choose mounting type (1 or 2): ");
+            
+            string? input = Console.ReadLine();
+            if (input == "1")
+                return "Internal";
+            else if (input == "2")
+                return "External";
+            
+            return null; // Invalid choice defaults to no mounting specified
         }
         
         /// <summary>
