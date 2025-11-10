@@ -47,6 +47,29 @@ namespace Mechapp
         }
 
         /// <summary>
+        /// Returns true if a part has dynamic scaling enabled (typically extremities)
+        /// </summary>
+        public static bool HasDynamicScale(string partName)
+        {
+            var def = GetPartDefinition(partName);
+            if (def == null) return false;
+
+            var dynamicScaleNode = def["dynamicScale"];
+            if (dynamicScaleNode == null) return false;
+
+            // Check if it's a boolean true
+            if (dynamicScaleNode is JsonValue jsonValue)
+            {
+                if (jsonValue.TryGetValue<bool>(out bool boolValue))
+                {
+                    return boolValue;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns MinScale level (1..N) for a part name, if specified in Parts.txt.
         /// Accepts either numeric ("3") or descriptor ("House(3)") formats.
         /// </summary>

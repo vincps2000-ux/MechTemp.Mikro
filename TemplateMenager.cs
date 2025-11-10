@@ -134,6 +134,9 @@ namespace Templates
             string? partName = partToAdd["name"]?.ToString();
             var definition = partName != null ? PartManager.GetPartDefinition(partName) : null;
 
+            // Check if part has dynamic scaling enabled
+            bool hasDynamicScale = !string.IsNullOrEmpty(partName) && PartManager.HasDynamicScale(partName!);
+
             // Determine Min/Max Scale constraints (if present)
             int? minScaleLevel = null;
             int maxScaleLevel = 4; // default global max
@@ -144,17 +147,24 @@ namespace Templates
             }
 
             // Determine desired scale:
-            // - If definition provides Scale (e.g., Frame), use it without prompting
-            // - Else prompt the user to choose a valid scale (filtered by parent)
-            string? desiredScale = definition? ["Scale"]?.ToString();
-            if (string.IsNullOrEmpty(desiredScale))
+            // - If part has dynamicScale=true (extremities), prompt user to choose
+            // - Otherwise, use the fixed Scale from the definition
+            string? desiredScale = definition?["Scale"]?.ToString();
+            if (hasDynamicScale)
             {
+                // Dynamic scale parts (extremities) - prompt user
                 desiredScale = PartManager.ChooseScale(parentScale, minScaleLevel, maxScaleLevel);
                 if (string.IsNullOrEmpty(desiredScale))
                 {
                     Console.WriteLine("Invalid scale selection!");
                     return -1;
                 }
+            }
+            else if (string.IsNullOrEmpty(desiredScale))
+            {
+                // Non-dynamic parts should have Scale in definition
+                Console.WriteLine($"Error: Part '{partName}' is missing required Scale in Parts.txt!");
+                return -1;
             }
 
             // Enforce: part scale must be <= parent scale (if parent exists)
@@ -193,11 +203,14 @@ namespace Templates
 
             // Set the chosen/defined scale on the part
             partToAdd["Scale"] = JsonValue.Create(desiredScale);
-            // Store MinScale/MaxScale on part for visibility (optional)
-            if (minScaleLevel.HasValue)
-                partToAdd["MinScale"] = JsonValue.Create(minScaleLevel.Value.ToString());
-            if (maxScaleLevel > 0)
-                partToAdd["MaxScale"] = JsonValue.Create(maxScaleLevel.ToString());
+            // Store MinScale/MaxScale on part for visibility (only for dynamic scale parts)
+            if (hasDynamicScale)
+            {
+                if (minScaleLevel.HasValue)
+                    partToAdd["MinScale"] = JsonValue.Create(minScaleLevel.Value.ToString());
+                if (maxScaleLevel > 0)
+                    partToAdd["MaxScale"] = JsonValue.Create(maxScaleLevel.ToString());
+            }
 
             // Determine mounting type for non-Frame, non-extremity parts
             string? partType = definition?["type"]?.ToString();

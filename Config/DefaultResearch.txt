@@ -1,9 +1,10 @@
 [
   "Exosuit-Frame",
-  "Gun",
+  "Pistol",
+  "Rifle",
+  "Optical Sensor",
   "Joint",
   "Connector",
   "Hand",
-  "Foot",
-  "Turret"
+  "Foot"
 ]
