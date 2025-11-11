@@ -116,12 +116,14 @@ namespace Mechapp
         static Tuple<JsonObject, Stack<JsonObject>>? NavigationStep(JsonObject currentObject, Stack<JsonObject> navigationStack, JsonObject rootObject)
         {
             Console.Clear();
-            // Recalculate stats and display weight limit
+            // Recalculate stats and display weight limit and total weight
             int weightLimit = 0;
+            double totalWeight = 0;
             string currentScale = "";
             if (_manager != null)
             {
                 weightLimit = StatCalc.GetWeightLimit(_manager.GetTemplate());
+                totalWeight = StatCalc.CalculateTotalWeight(_manager.GetTemplate());
                 // Get scale of current object if it exists
                 var scale = currentObject["Scale"]?.ToString();
                 if (!string.IsNullOrEmpty(scale))
@@ -129,7 +131,7 @@ namespace Mechapp
                     currentScale = scale;
                 }
             }
-            Console.WriteLine($"=== JSON Navigator ===    Weight limit: {weightLimit}    Scale: {currentScale}");
+            Console.WriteLine($"=== JSON Navigator ===    Weight: {totalWeight:F1}/{weightLimit}    Scale: {currentScale}");
 
             // Get all parts at current level
             List<JsonObject> parts = GetChildParts(currentObject);

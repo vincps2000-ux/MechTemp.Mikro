@@ -53,5 +53,70 @@ namespace Mechapp
             return 0;
         }
 
+        /// <summary>
+        /// Calculates the total weight of all parts in the template.
+        /// Recursively sums weights of all parts, using their actual scale and weight formulas.
+        /// </summary>
+        /// <param name="template">The template to calculate weight for</param>
+        /// <returns>Total weight as a double</returns>
+        public static double CalculateTotalWeight(JsonObject template)
+        {
+            if (template == null)
+                return 0;
+
+            double totalWeight = 0;
+
+            // Process all top-level parts
+            foreach (var prop in template)
+            {
+                if (prop.Value is JsonObject obj)
+                {
+                    totalWeight += CalculatePartWeight(obj);
+                }
+            }
+
+            return totalWeight;
+        }
+
+        /// <summary>
+        /// Recursively calculates the weight of a part and all its children.
+        /// Frames are excluded from weight calculation as they define the weight capacity.
+        /// </summary>
+        /// <param name="part">The part object to calculate weight for</param>
+        /// <returns>Weight of this part plus all children</returns>
+        private static double CalculatePartWeight(JsonObject part)
+        {
+            double weight = 0;
+
+            // Get part name and scale
+            string? partName = part["name"]?.ToString();
+            string? scale = part["Scale"]?.ToString();
+
+            if (!string.IsNullOrEmpty(partName) && !string.IsNullOrEmpty(scale))
+            {
+                // Skip Frames - they define weight capacity, not consume it
+                string? partType = PartManager.GetTypeForName(partName);
+                if (partType == null || !partType.Equals("Frame", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    // Calculate weight for this part using PartManager
+                    weight = PartManager.GetWeightForPart(partName, scale);
+                }
+            }
+
+            // Process children recursively
+            if (part["children"] is JsonArray children)
+            {
+                foreach (var child in children)
+                {
+                    if (child is JsonObject childObj)
+                    {
+                        weight += CalculatePartWeight(childObj);
+                    }
+                }
+            }
+
+            return weight;
+        }
+
     }
 }

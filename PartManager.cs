@@ -70,6 +70,48 @@ namespace Mechapp
         }
 
         /// <summary>
+        /// Calculates the weight of a part based on its definition and actual scale.
+        /// If WeightFormula exists, evaluates it; otherwise returns base Weight.
+        /// </summary>
+        /// <param name="partName">Name of the part</param>
+        /// <param name="actualScale">The actual scale of the part instance (e.g., "Personal(1)")</param>
+        /// <returns>Calculated weight as a double</returns>
+        public static double GetWeightForPart(string partName, string actualScale)
+        {
+            var def = GetPartDefinition(partName);
+            if (def == null) return 0;
+
+            var weightNode = def["Weight"];
+            if (weightNode == null) return 0;
+
+            // Get base weight
+            if (!double.TryParse(weightNode.ToString(), out double baseWeight))
+                return 0;
+
+            // Check if there's a weight formula
+            var formulaNode = def["WeightFormula"];
+            if (formulaNode != null)
+            {
+                string formula = formulaNode.ToString();
+                int scaleLevel = GetScaleLevel(actualScale);
+                
+                // Simple formula parser for "Weight * Scale"
+                if (formula.Contains("Weight * Scale"))
+                {
+                    return baseWeight * scaleLevel;
+                }
+                else if (formula.Contains("Weight * Scale * Scale"))
+                {
+                    return baseWeight * scaleLevel * scaleLevel;
+                }
+                // Add more formula patterns as needed
+            }
+
+            // No formula, return base weight
+            return baseWeight;
+        }
+
+        /// <summary>
         /// Returns MinScale level (1..N) for a part name, if specified in Parts.txt.
         /// Accepts either numeric ("3") or descriptor ("House(3)") formats.
         /// </summary>

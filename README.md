@@ -7,11 +7,15 @@ A C# console app for interactively building hierarchical mech templates from a p
 - Add parts from a data-driven catalog (`Parts.txt`)
 - Root-only frame rule: exactly one Frame allowed at the root
 - Category-driven selection when adding children (Frames hidden for children)
-- Stats display per step: Weight Limit and current node's Scale
+- Stats display per step: Total Weight / Weight Limit and current node's Scale
 - Scale system with validation
-  - Frames get their Scale from `Parts.txt` automatically (no prompt)
-  - Non-frame parts are prompted to choose a Scale
+  - Frames and most parts have fixed Scales from `Parts.txt` (no prompt)
+  - Only extremities (Joints, Connectors, etc.) with `dynamicScale: true` prompt for Scale
   - A child part's Scale must be the same or smaller than its parent's Scale
+- Weight system with dynamic calculation
+  - Each part has a base Weight in `Parts.txt`
+  - Parts with `WeightFormula` calculate weight based on their actual Scale
+  - Total weight is displayed and must not exceed the frame's Weight Limit
 - **Save and Load Templates**
   - Save your templates to the `Templates` folder
   - Load existing templates at startup or during navigation
@@ -31,15 +35,28 @@ A C# console app for interactively building hierarchical mech templates from a p
   - The UI header shows the current node's Scale.
   - Each listed part shows its `Scale` alongside its name and PartID.
 
-## Weight Limit
-- Computed via `StatCalc.GetWeightLimit()` from the template's root Frame name.
-- Example mapping (can be adjusted in `StatCalc.cs`):
-  - Exosuit → 2000
-  - DemiMech → 1500
-  - Light → 800
-  - Medium → 1200
-  - Heavy → 1800
-  - Colossal → 3000
+## Weight System
+- **Weight Limit**: Read from the Frame's `WeightLimit` property in `Parts.txt`
+  - Exosuit-Frame → 500
+  - DemiMech-Frame → 1000
+  - Light-Frame → 5000
+  - Medium-Frame → 10000
+  - Heavy-Frame → 20000
+  - Colossal-Frame → 50000
+- **Total Weight**: Calculated by `StatCalc.CalculateTotalWeight()` by summing all parts
+  - **Frames do NOT count toward weight** - they define the capacity, not consume it
+  - Fixed-scale parts (Weapons, Sensors, Controls) use their base Weight value
+  - Dynamic-scale parts (extremities) use `WeightFormula` (e.g., `Weight * Scale`)
+  - Example: A Joint with Weight=5 at Vehicle(2) scale weighs 5 × 2 = 10
+- **Weight Limit Enforcement**: 
+  - When adding a part, the system checks if it would exceed the weight limit
+  - If exceeded, the part is **rejected** with a detailed error message showing:
+    - Current weight
+    - Part weight being added
+    - Total that would result
+    - Weight limit
+    - Amount over the limit
+  - This prevents building over-weight templates
 
 ## Controls
 - Type a number: Navigate into that part
@@ -65,16 +82,20 @@ dotnet run
 
 ```json
 [
-  { "name": "Exosuit-Frame",  "type": "Frame",  "WeightLimit": "500",  "Scale": "Personal(1)" },
-  { "name": "Cockpit",        "type": "Control" },
-  { "name": "Gun",            "type": "Weapon" }
+  { "name": "Exosuit-Frame", "type": "Frame", "WeightLimit": "500", "Scale": "Personal(1)", "Weight": "50" },
+  { "name": "Personal Cockpit", "type": "Control", "Scale": "Personal(1)", "Weight": "15" },
+  { "name": "Pistol", "type": "Weapon", "Scale": "Personal(1)", "Weight": "2" },
+  { "name": "Joint", "type": "extremity", "dynamicScale": true, "MinScale": 1, "Weight": "5", "WeightFormula": "Weight * Scale" }
 ]
 ```
 
 Notes:
 - `type` controls category selection and property display.
-- If `Scale` is present, it will be used as-is (no prompt).
-- If `Scale` is absent, the user will choose a valid Scale at add time.
+- `Scale`: Fixed-scale parts have this predefined; dynamic-scale parts prompt the user.
+- `dynamicScale`: If `true`, user chooses Scale within constraints (typically extremities only).
+- `Weight`: Base weight value for the part.
+- `WeightFormula`: Optional formula for dynamic weight calculation (e.g., "Weight * Scale").
+- `Mounting`: Added automatically for Control/Weapon/Sensor parts (Internal or External).
 
 ## File Map
 - `Program.cs` – Console UI and navigation

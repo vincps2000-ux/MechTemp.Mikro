@@ -230,6 +230,29 @@ namespace Templates
             IDCounter++;
             partToAdd["PartID"] = IDCounter;
 
+            // Check if adding this part would exceed the weight limit
+            // (Only check for non-Frame parts since Frames define the capacity)
+            if (!string.IsNullOrEmpty(partType) && 
+                !partType.Equals("Frame", StringComparison.OrdinalIgnoreCase))
+            {
+                double currentWeight = StatCalc.CalculateTotalWeight(managedTemplate);
+                double newPartWeight = PartManager.GetWeightForPart(partName!, desiredScale!);
+                int weightLimit = StatCalc.GetWeightLimit(managedTemplate);
+                
+                if (currentWeight + newPartWeight > weightLimit)
+                {
+                    Console.WriteLine($"\n!!! WEIGHT LIMIT EXCEEDED !!!");
+                    Console.WriteLine($"Current weight: {currentWeight:F1}");
+                    Console.WriteLine($"Part weight: {newPartWeight:F1}");
+                    Console.WriteLine($"Total would be: {(currentWeight + newPartWeight):F1}");
+                    Console.WriteLine($"Weight limit: {weightLimit}");
+                    Console.WriteLine($"Cannot add '{partName}' - would exceed weight capacity by {(currentWeight + newPartWeight - weightLimit):F1} units.");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey(true);
+                    return -1;
+                }
+            }
+
             // Copy additional properties from definition (won't override chosen Scale if definition lacks it)
             if (definition != null)
             {

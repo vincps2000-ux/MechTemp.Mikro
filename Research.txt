@@ -6,6 +6,5 @@
   "Joint",
   "Connector",
   "Hand",
-  "Foot",
-  "Turret"
+  "Foot"
 ]
