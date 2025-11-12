@@ -43,6 +43,10 @@ namespace Mechapp
                 {
                     ResearchLab.Run();
                 }
+                   else if (selected.Equals("Archive Building", System.StringComparison.OrdinalIgnoreCase))
+                   {
+                       ArchiveBuilding.Show();
+                   }
                 else
                 {
                     Console.Clear();

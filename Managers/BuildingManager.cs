@@ -22,7 +22,8 @@ namespace Mechapp
             "Mech Factory",
             "Research Lab",
             "Sales Office",
-            "Operations Office"
+            "Operations Office",
+            "Archive Building"
         };
 
         public static List<string> GetBuildings()
@@ -59,26 +60,34 @@ namespace Mechapp
             {
                 if (!File.Exists(_descriptionsFile))
                 {
-                    // Fallback to basic list without descriptions
                     var buildings = GetBuildings();
                     return buildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
                 }
 
                 var json = File.ReadAllText(_descriptionsFile);
-                var buildingList = JsonSerializer.Deserialize<List<BuildingInfo>>(json);
-                
-                if (buildingList != null && buildingList.Count > 0)
+                // Try to parse as array of objects with Name/Description
+                var arr = JsonNode.Parse(json) as JsonArray;
+                var buildingList = new List<BuildingInfo>();
+                if (arr != null)
                 {
-                    return buildingList;
+                    foreach (var item in arr)
+                    {
+                        var name = item?["Name"]?.ToString() ?? "";
+                        var desc = item?["Description"]?.ToString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(name))
+                            buildingList.Add(new BuildingInfo { Name = name, Description = desc });
+                    }
                 }
-
-                // Fallback if deserialization fails
-                var fallbackBuildings = GetBuildings();
-                return fallbackBuildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
+                // If parsing failed or no buildings, fallback
+                if (buildingList.Count == 0)
+                {
+                    var fallbackBuildings = GetBuildings();
+                    return fallbackBuildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
+                }
+                return buildingList;
             }
             catch
             {
-                // Fallback on error
                 var fallbackBuildings = GetBuildings();
                 return fallbackBuildings.ConvertAll(b => new BuildingInfo { Name = b, Description = "" });
             }
