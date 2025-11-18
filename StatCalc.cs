@@ -7,6 +7,20 @@ namespace Mechapp
     // Simple stat calculator for template-derived stats
     public static class StatCalc
     {
+        public class MechAction
+        {
+            public string Name { get; set; } = string.Empty;
+            public string? Description { get; set; }
+        }
+
+        public class MechStats
+        {
+            public string Scale { get; set; } = ""; // overall mech scale (from frame)
+            public double Weight { get; set; } // total current weight
+            public int WeightLimit { get; set; } // capacity from frame
+            public List<MechAction> Actions { get; set; } = new List<MechAction>();
+        }
+
         // For now, only calculate a weight limit based on the root frame type.
         // Rules (example):
         // - Exosuit-Frame -> 2000
@@ -116,6 +130,118 @@ namespace Mechapp
             }
 
             return weight;
+        }
+
+        /// <summary>
+        /// Compute overall mech stats: scale (from frame), weight/limit, and list of actions from parts.
+        /// </summary>
+        public static MechStats ComputeMechStats(JsonObject template)
+        {
+            var stats = new MechStats();
+            if (template == null) return stats;
+
+            // Weight/limit
+            stats.WeightLimit = GetWeightLimit(template);
+            stats.Weight = CalculateTotalWeight(template);
+
+            // Scale from frame
+            var frame = FindFirstFramePart(template);
+            if (frame != null)
+            {
+                var sc = frame["Scale"]?.ToString();
+                if (!string.IsNullOrEmpty(sc)) stats.Scale = sc!;
+            }
+
+            // Actions: collect from each part definition; repeat per part instance
+            var allParts = EnumerateAllParts(template);
+            foreach (var part in allParts)
+            {
+                var name = part["name"]?.ToString();
+                if (string.IsNullOrEmpty(name)) continue;
+
+                var actions = PartManager.GetActionsForPartName(name!);
+                foreach (var a in actions)
+                {
+                    stats.Actions.Add(new MechAction
+                    {
+                        Name = a,
+                        Description = ActionsManager.GetDescription(a)
+                    });
+                }
+            }
+
+            return stats;
+        }
+
+        private static IEnumerable<JsonObject> EnumerateAllParts(JsonObject root)
+        {
+            // parts may be stored as Part_* properties or under children arrays; traverse all JsonObjects with PartID or with name
+            foreach (var prop in root)
+            {
+                if (prop.Value is JsonObject obj)
+                {
+                    foreach (var inner in EnumerateAllParts(obj))
+                        yield return inner;
+                }
+                else if (prop.Value is JsonArray arr)
+                {
+                    foreach (var item in arr)
+                    {
+                        if (item is JsonObject ch)
+                        {
+                            foreach (var inner in EnumerateAllParts(ch))
+                                yield return inner;
+                        }
+                    }
+                }
+            }
+
+            // If this node itself looks like a part (has PartID or name), yield it
+            if (root["name"] != null && root["PartID"] != null)
+            {
+                yield return root;
+            }
+        }
+
+        private static JsonObject? FindFirstFramePart(JsonObject template)
+        {
+            // Scan top-level first for performance
+            foreach (var prop in template)
+            {
+                if (prop.Value is JsonObject obj)
+                {
+                    string? name = obj["name"]?.ToString();
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        var type = PartManager.GetTypeForName(name);
+                        if (type != null && type.Equals("Frame", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            return obj;
+                        }
+                    }
+                }
+            }
+            // fallback recursive search
+            foreach (var prop in template)
+            {
+                if (prop.Value is JsonObject obj)
+                {
+                    var found = FindFirstFramePart(obj);
+                    if (found != null) return found;
+                }
+                else if (prop.Value is JsonArray arr)
+                {
+                    foreach (var item in arr)
+                    {
+                        if (item is JsonObject ch)
+                        {
+                            var found = FindFirstFramePart(ch);
+                            if (found != null) return found;
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
     }

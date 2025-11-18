@@ -8,6 +8,7 @@ A C# console app for interactively building hierarchical mech templates from a p
 - Root-only frame rule: exactly one Frame allowed at the root
 - Category-driven selection when adding children (Frames hidden for children)
 - Stats display per step: Total Weight / Weight Limit and current node's Scale
+- Tag system on parts with descriptions
 - Scale system with validation
   - Frames and most parts have fixed Scales from `Parts.txt` (no prompt)
   - Only extremities (Joints, Connectors, etc.) with `dynamicScale: true` prompt for Scale
@@ -97,12 +98,23 @@ Notes:
 - `WeightFormula`: Optional formula for dynamic weight calculation (e.g., "Weight * Scale").
 - `Mounting`: Added automatically for Control/Weapon/Sensor parts (Internal or External).
 
+## Tag System
+- Each part can declare `Tags` in `Parts.txt` to classify behavior and attributes (e.g., `Melee`, `Ranged`, `Physical`, `Energy`, `Explosive`).
+- Tags can carry values using parentheses, e.g., `distance(300)` for effective range or `Energy(40)` for energy rating.
+- Descriptions for tags are defined in `Config/Tags.txt` and are shown in the Info screen as a legend.
+- Viewing tags:
+  - In the Design Bureau, press `I` at the root to open the Info screen which now shows:
+    - Actions (with descriptions)
+    - Tags by Part (the tags assigned to each part instance)
+    - Tag Legend (unique tag names with descriptions)
+
 ## File Map
 - `Program.cs` – Console UI and navigation
 - `TemplateMenager.cs` – Template management, rules (root frame, scale enforcement)
 - `PartManager.cs` – Parts catalog loading, category lists, property metadata, scale helpers
 - `StatCalc.cs` – Weight limit derivation from root frame
 - `PersistencyManager.cs` – Template save/load functionality
+- `Managers/TagsManager.cs` – Loads tag descriptions and parses tag names/values
 - `Parts.txt` – Parts data source
 - `Templates/` – Folder where saved templates are stored
 

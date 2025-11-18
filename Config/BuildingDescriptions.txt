@@ -18,7 +18,7 @@
   {
     "Name": "Operations Office",
     "Description": "General transformational Work inside the Business"
-  }
+  },
   {
     "Name": "Archive Building",
     "Description": "Browse researched parts and view their descriptions"

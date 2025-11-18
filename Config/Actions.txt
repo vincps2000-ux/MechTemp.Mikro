@@ -1,0 +1,19 @@
+[
+  { "name": "Attack(Pistol)", "description": "Low caliber attack for pistol." },
+  { "name": "Attack(Rifle)", "description": "Standard ballistic rifle attack." },
+  { "name": "Attack(Autocannon)", "description": "Rapid-fire vehicle-grade autocannon attack." },
+  { "name": "Attack(Tank Cannon)", "description": "Heavy shell impact from tank cannon." },
+  { "name": "Attack(Howitzer)", "description": "Long-range artillery barrage." },
+  { "name": "Attack(Plasma Pistol)", "description": "Short-range plasma discharge." },
+  { "name": "Attack(Plasma Rifle)", "description": "Vehicle-grade plasma bolt." },
+  { "name": "Attack(Plasma Cannon)", "description": "High-energy plasma blast." },
+  { "name": "Attack(Personal Missile)", "description": "Personal AT/AA missile strike." },
+  { "name": "Attack(Vehicle Missile)", "description": "Vehicle-scale guided missile impact." },
+  { "name": "Attack(Heavy Missile)", "description": "Heavy warhead detonation." },
+  { "name": "Attack(Flamethrower)", "description": "Short-range flame cone." },
+  { "name": "Attack(Heavy Flamethrower)", "description": "Wide cone of intense flames." },
+  { "name": "Attack(Sword)", "description": "Close-quarters melee slash." },
+  { "name": "Attack(Great Sword)", "description": "Powerful sweeping melee attack." },
+  { "name": "Attack(Hand)", "description": "Default Melee attack." },
+  { "name": "Attack(Kick)", "description": "Default Kick attack." }
+]

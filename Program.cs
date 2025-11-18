@@ -15,6 +15,7 @@ namespace Mechapp
         public const char AddPartKey = 'A'; // Change this letter to change the Add New Part key
         public const char SaveKey = 'S'; // Key for saving template
         public const char LoadKey = 'L'; // Key for loading template
+    public const char InfoKey = 'I'; // Key for showing mech stats
         
         static void Main(string[] args)
         {
@@ -163,6 +164,15 @@ namespace Mechapp
                         displayText += $" | {prop}: {propValue}";
                     }
                 }
+                // Also display Tags directly from definition if not copied into instance
+                if (parts[i]["Tags"] == null)
+                {
+                    var tags = PartManager.GetTagsForPartName(name);
+                    if (tags.Count > 0)
+                    {
+                        displayText += " | Tags: " + string.Join(", ", tags);
+                    }
+                }
                 
                 // Display Mounting if present (for non-Frame, non-extremity parts)
                 if (parts[i]["Mounting"] != null)
@@ -187,6 +197,7 @@ namespace Mechapp
             {
                 Console.WriteLine($"{SaveKey}. [Save Template]");
                 Console.WriteLine($"{LoadKey}. [Load Template]");
+                Console.WriteLine($"{InfoKey}. [Show Mech Stats]");
             }
 
             Console.WriteLine("\nEnter number to navigate" + (canAdd ? ", letter for action" : "") + ", or 'q' to quit: ");
@@ -224,6 +235,80 @@ namespace Mechapp
                         currentObject = _manager.GetTemplate();
                         navigationStack.Clear();
                     }
+                }
+            }
+            // Handle Show Mech Stats (only at root)
+            else if (navigationStack.Count == 0 && input != null && input.Length == 1 && char.ToUpper(input[0]) == InfoKey)
+            {
+                if (_manager != null)
+                {
+                    var stats = StatCalc.ComputeMechStats(_manager.GetTemplate());
+                    Console.Clear();
+                    Console.WriteLine("=== Mech Stats ===\n");
+                    Console.WriteLine($"Scale: {stats.Scale}");
+                    Console.WriteLine($"Weight: {stats.Weight:F1} / {stats.WeightLimit}");
+                    Console.WriteLine("\nActions:");
+                    if (stats.Actions.Count == 0)
+                    {
+                        Console.WriteLine("- None");
+                    }
+                    else
+                    {
+                        int idx = 1;
+                        foreach (var a in stats.Actions)
+                        {
+                            var desc = string.IsNullOrWhiteSpace(a.Description) ? "" : $" — {a.Description}";
+                            Console.WriteLine($"{idx++}. {a.Name}{desc}");
+                        }
+                    }
+
+                    // Show Tags by part and tag legend
+                    var partsList = EnumerateAllParts(_manager.GetTemplate()).ToList();
+                    Console.WriteLine("\nTags by Part:");
+                    if (partsList.Count == 0)
+                    {
+                        Console.WriteLine("- None");
+                    }
+                    else
+                    {
+                        foreach (var p in partsList)
+                        {
+                            var pname = p["name"]?.ToString() ?? "Unnamed";
+                            var tags = p["Tags"] != null
+                                ? (p["Tags"] is JsonArray ja ? ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList() : new List<string> { p["Tags"]!.ToString() })
+                                : PartManager.GetTagsForPartName(pname);
+                            if (tags.Count > 0)
+                            {
+                                Console.WriteLine($"- {pname}: {string.Join(", ", tags)}");
+                            }
+                        }
+                    }
+
+                    // Tag legend with descriptions
+                    var uniqueBase = new Dictionary<string, string?>(System.StringComparer.OrdinalIgnoreCase);
+                    foreach (var p in partsList)
+                    {
+                        var pname = p["name"]?.ToString() ?? "";
+                        var tags = p["Tags"] != null
+                            ? (p["Tags"] is JsonArray ja ? ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList() : new List<string> { p["Tags"]!.ToString() })
+                            : PartManager.GetTagsForPartName(pname);
+                        foreach (var tg in tags)
+                        {
+                            var baseName = Mechapp.TagsManager.GetBaseName(tg);
+                            uniqueBase[baseName] = Mechapp.TagsManager.GetDescription(baseName);
+                        }
+                    }
+                    if (uniqueBase.Count > 0)
+                    {
+                        Console.WriteLine("\nTag legend:");
+                        foreach (var kv in uniqueBase)
+                        {
+                            var desc = string.IsNullOrWhiteSpace(kv.Value) ? "" : $" — {kv.Value}";
+                            Console.WriteLine($"- {kv.Key}{desc}");
+                        }
+                    }
+                    Console.WriteLine("\nPress any key to return...");
+                    Console.ReadKey(true);
                 }
             }
             // Handle Add New Part only if allowed
@@ -380,6 +465,35 @@ namespace Mechapp
                 }
             }
             return parts;
+        }
+
+        // Enumerate all parts in the template recursively
+        static IEnumerable<JsonObject> EnumerateAllParts(JsonObject root)
+        {
+            foreach (var prop in root)
+            {
+                if (prop.Value is JsonObject obj)
+                {
+                    foreach (var inner in EnumerateAllParts(obj))
+                        yield return inner;
+                }
+                else if (prop.Value is JsonArray arr)
+                {
+                    foreach (var item in arr)
+                    {
+                        if (item is JsonObject ch)
+                        {
+                            foreach (var inner in EnumerateAllParts(ch))
+                                yield return inner;
+                        }
+                    }
+                }
+            }
+
+            if (root["name"] != null && root["PartID"] != null)
+            {
+                yield return root;
+            }
         }
 
         static void ShowSaveTemplateMenu()

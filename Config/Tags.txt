@@ -1,0 +1,8 @@
+[
+  { "name": "Melee", "description": "Close-quarters combat capability." },
+  { "name": "Ranged", "description": "Long-distance attack capability." },
+  { "name": "Physical", "description": "Kinetic or conventional physical damage type." },
+  { "name": "Energy", "description": "Energy-based operation or damage type; value may indicate energy demand or rating." },
+  { "name": "Explosive", "description": "Explosive payload or effect." },
+  { "name": "distance", "description": "Operational distance or effective range (units arbitrary, e.g., meters)." }
+]

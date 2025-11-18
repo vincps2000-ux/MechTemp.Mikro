@@ -3,6 +3,6 @@
   "Mech Factory",
   "Research Lab",
   "Sales Office",
-  "Operations Office"
+  "Operations Office",
   "Archive Building"
 ]

@@ -308,6 +308,8 @@ namespace Mechapp
             properties.Add("MinScale");
             // Include MaxScale for visibility (will default logically to 4 if omitted)
             properties.Add("MaxScale");
+            // Include Tags so template instances carry tag metadata and UI can display it
+            properties.Add("Tags");
             
             // Add additional specific properties based on part type
             switch (partType.ToLower())
@@ -315,10 +317,72 @@ namespace Mechapp
                 case "frame":
                     // Frame might have additional specific properties in the future
                     break;
+                case "weapon":
+                    // Show Actions if present for weapons
+                    properties.Add("Actions");
+                    break;
                 // Add cases for other part types here
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// Returns the list of action names granted by a part definition (from Parts.txt, property "Actions").
+        /// Supports either a single string or an array of strings. Returns empty list if none.
+        /// </summary>
+        public static List<string> GetActionsForPartName(string partName)
+        {
+            var result = new List<string>();
+            var def = GetPartDefinition(partName);
+            if (def == null) return result;
+
+            var actionsNode = def["Actions"];
+            if (actionsNode == null) return result;
+
+            if (actionsNode is JsonValue)
+            {
+                string? action = actionsNode?.ToString();
+                if (!string.IsNullOrWhiteSpace(action)) result.Add(action!);
+            }
+            else if (actionsNode is JsonArray arr)
+            {
+                foreach (var item in arr)
+                {
+                    var s = item?.ToString();
+                    if (!string.IsNullOrWhiteSpace(s)) result.Add(s!);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the list of tags for a part definition (from Parts.txt, property "Tags").
+        /// Supports either a single string or an array of strings. Returns empty list if none.
+        /// </summary>
+        public static List<string> GetTagsForPartName(string partName)
+        {
+            var result = new List<string>();
+            var def = GetPartDefinition(partName);
+            if (def == null) return result;
+
+            var tagsNode = def["Tags"];
+            if (tagsNode == null) return result;
+
+            if (tagsNode is JsonValue)
+            {
+                string? tag = tagsNode?.ToString();
+                if (!string.IsNullOrWhiteSpace(tag)) result.Add(tag!);
+            }
+            else if (tagsNode is JsonArray arr)
+            {
+                foreach (var item in arr)
+                {
+                    var s = item?.ToString();
+                    if (!string.IsNullOrWhiteSpace(s)) result.Add(s!);
+                }
+            }
+            return result;
         }
     }
 }
