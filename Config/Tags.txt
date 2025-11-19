@@ -4,5 +4,11 @@
   { "name": "Physical", "description": "Kinetic or conventional physical damage type." },
   { "name": "Energy", "description": "Energy-based operation or damage type; value may indicate energy demand or rating." },
   { "name": "Explosive", "description": "Explosive payload or effect." },
-  { "name": "distance", "description": "Operational distance or effective range (units arbitrary, e.g., meters)." }
+  { "name": "distance", "description": "Operational distance or effective range (units arbitrary, e.g., meters)." },
+  { "name": "Sensor", "description": "Provides detection or targeting capabilities." },
+  { "name": "Control", "description": "Crewed or automated control systems." },
+  { "name": "Frame", "description": "Primary chassis that defines capacity and scale." },
+  { "name": "Extremity", "description": "Limb or mount component; often dynamically scaled." },
+  { "name": "Weapon", "description": "Offensive equipment capable of attacks." },
+  { "name": "Generator", "description": "Power generation or storage subsystem." }
 ]

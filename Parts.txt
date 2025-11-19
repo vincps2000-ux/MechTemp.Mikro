@@ -39,5 +39,10 @@
   {"name": "Hand","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"20","WeightFormula":"Weight * Scale","Description":"Manipulative hand for mechs.","Actions":["Attack(Hand)"],"Tags":["Melee","Physical"]},
   {"name": "Foot","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"35","WeightFormula":"Weight * Scale","Description":"Foot for walking mechs.","Actions":["Attack(Kick)"]},
   {"name": "Turret","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"100","WeightFormula":"Weight * Scale","Description":"Rotating turret mount."},
-  {"name": "Core","type":"extremity","dynamicScale":true,"MinScale":3,"Weight":"100","WeightFormula":"Weight * Scale","Description":"Central core for power and control."}
+  {"name": "Core","type":"extremity","dynamicScale":true,"MinScale":3,"Weight":"100","WeightFormula":"Weight * Scale","Description":"Central core for power and control."},
+
+  {"name": "Fuel Generator","type":"Generator","Scale":"Vehicle(2)","dynamicScale":true,"MinScale":1,"Weight":"60","WeightFormula":"Weight * Scale","Description":"Internal combustion generator providing sustained power output.","Tags":["Generator","Energy","Energy(60)"]},
+  {"name": "Reactor","type":"Generator","Scale":"House(3)","dynamicScale":true,"MinScale":3,"Weight":"200","WeightFormula":"Weight * Scale","Description":"High-output reactor core for large-scale mechs.","Tags":["Generator","Energy","Energy(200)"]},
+  {"name": "Battery Pack","type":"Generator","Scale":"Personal(1)","Weight":"25","Description":"Rechargeable battery module for small systems.","Tags":["Generator","Energy","Energy(20)"]},
+  {"name": "Solar Cell","type":"Generator","Scale":"Personal(1)","Weight":"10","Description":"Lightweight solar array providing trickle charge.","Tags":["Generator","Energy","Energy(5)"]}
 ]

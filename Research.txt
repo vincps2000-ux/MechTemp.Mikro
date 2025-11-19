@@ -6,5 +6,10 @@
   "Joint",
   "Connector",
   "Hand",
-  "Foot"
+  "Foot",
+  "Fuel Generator",
+  "Reactor",
+  "Battery Pack",
+  "Solar Cell",
+  "Colossal-Frame"
 ]
