@@ -1,8 +1,8 @@
 [
   { "name": "Melee", "description": "Close-quarters combat capability." },
   { "name": "Ranged", "description": "Long-distance attack capability." },
-  { "name": "Physical", "description": "Kinetic or conventional physical damage type." },
-  { "name": "Energy", "description": "Energy-based operation or damage type; value may indicate energy demand or rating." },
+  { "name": "Physical Damage", "description": "Kinetic damage type." },
+  { "name": "Energy Damage", "description": "Energy-based damage type." },
   { "name": "Explosive", "description": "Explosive payload or effect." },
   { "name": "distance", "description": "Operational distance or effective range (units arbitrary, e.g., meters)." },
   { "name": "Sensor", "description": "Provides detection or targeting capabilities." },
@@ -10,5 +10,7 @@
   { "name": "Frame", "description": "Primary chassis that defines capacity and scale." },
   { "name": "Extremity", "description": "Limb or mount component; often dynamically scaled." },
   { "name": "Weapon", "description": "Offensive equipment capable of attacks." },
-  { "name": "Generator", "description": "Power generation or storage subsystem." }
+  { "name": "Energy generation", "description": "Power generation." },
+  { "name": "Energy storage", "description": "Storage subsystem." },
+  { "name": "Energy drain", "description": "Drain Use of the Part causes." }
 ]
