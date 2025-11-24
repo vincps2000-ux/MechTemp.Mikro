@@ -11,6 +11,7 @@ namespace Mechapp.UI
             while (true)
             {
                 Console.Clear();
+                ResourceManager.DisplayResourceBar();
                 Console.WriteLine("=== Research Lab ===\n");
                 Console.WriteLine("1. Research by Category");
                 Console.WriteLine("2. Research from full list");
@@ -46,6 +47,7 @@ namespace Mechapp.UI
             while (true)
             {
                 Console.Clear();
+                ResourceManager.DisplayResourceBar();
                 Console.WriteLine("== Research by Category ==\n");
                 var categories = PartManager.GetAllCategories();
                 if (categories.Count == 0)
@@ -108,6 +110,7 @@ namespace Mechapp.UI
             while (true)
             {
                 Console.Clear();
+                ResourceManager.DisplayResourceBar();
                 Console.WriteLine("== Research — All Unresearched Parts ==\n");
                 var list = ResearchManager.GetUnresearchedParts();
                 if (list.Count == 0)
@@ -144,6 +147,7 @@ namespace Mechapp.UI
         private static void ShowResearched()
         {
             Console.Clear();
+            ResourceManager.DisplayResourceBar();
             Console.WriteLine("== Researched Parts ==\n");
             var list = ResearchManager.GetResearched();
             if (list.Count == 0)

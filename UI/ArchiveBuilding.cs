@@ -9,6 +9,7 @@ namespace Mechapp.UI
         public static void Show()
         {
             Console.Clear();
+            ResourceManager.DisplayResourceBar();
             Console.WriteLine("=== Archive Building ===\n");
             var researched = ResearchManager.GetResearched();
             if (researched.Count == 0)

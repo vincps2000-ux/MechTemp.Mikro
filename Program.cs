@@ -19,8 +19,11 @@ namespace Mechapp
         
         static void Main(string[] args)
         {
-            // New entry flow: Building selection first, then Design Bureau opens the template builder
+            // Initialize game systems
+            ResourceManager.Initialize();
             ResearchManager.ApplyDefaultsOnStart();
+            
+            // New entry flow: Building selection first, then Design Bureau opens the template builder
             RunFromDistrictDirectory();
         }
 
@@ -51,6 +54,7 @@ namespace Mechapp
                 else
                 {
                     Console.Clear();
+                    ResourceManager.DisplayResourceBar();
                     Console.WriteLine($"{selected} — Feature to be added later.");
                     Console.WriteLine("Press any key to return to the District Directory...");
                     Console.ReadKey(true);
@@ -121,6 +125,7 @@ namespace Mechapp
         static Tuple<JsonObject, Stack<JsonObject>>? NavigationStep(JsonObject currentObject, Stack<JsonObject> navigationStack, JsonObject rootObject)
         {
             Console.Clear();
+            ResourceManager.DisplayResourceBar();
             // Recalculate stats and display weight limit and total weight
             int weightLimit = 0;
             double totalWeight = 0;
@@ -244,6 +249,7 @@ namespace Mechapp
                 {
                     var stats = StatCalc.ComputeMechStats(_manager.GetTemplate());
                     Console.Clear();
+                    ResourceManager.DisplayResourceBar();
                     Console.WriteLine("=== Mech Stats ===\n");
                     Console.WriteLine($"Scale: {stats.Scale}");
                     Console.WriteLine($"Weight: {stats.Weight:F1} / {stats.WeightLimit}");
@@ -499,6 +505,7 @@ namespace Mechapp
         static void ShowSaveTemplateMenu()
         {
             Console.Clear();
+            ResourceManager.DisplayResourceBar();
             Console.WriteLine("=== Save Template ===");
             Console.Write("Enter filename (without .json extension): ");
             string fileName = Console.ReadLine() ?? "";
@@ -529,6 +536,7 @@ namespace Mechapp
         static JsonObject? ShowLoadTemplateMenu()
         {
             Console.Clear();
+            ResourceManager.DisplayResourceBar();
             Console.WriteLine("=== Load Template ===");
             
             var savedTemplates = PersistencyManager.GetSavedTemplates();

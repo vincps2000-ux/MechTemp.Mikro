@@ -10,6 +10,7 @@ namespace Mechapp.UI
             while (true)
             {
                 Console.Clear();
+                ResourceManager.DisplayResourceBar();
                 Console.WriteLine("=== District Directory ===");
                 Console.WriteLine("Select a building (or 'q' to quit):\n");
 

@@ -10,6 +10,5 @@
   "Fuel Generator",
   "Reactor",
   "Battery Pack",
-  "Solar Cell",
-  "Colossal-Frame"
+  "Solar Cell"
 ]
