@@ -18,6 +18,7 @@ namespace Mechapp
             public string Scale { get; set; } = ""; // overall mech scale (from frame)
             public double Weight { get; set; } // total current weight
             public int WeightLimit { get; set; } // capacity from frame
+            public double CombinedStability { get; set; } // sum of Stability tag values across parts
             public List<MechAction> Actions { get; set; } = new List<MechAction>();
         }
 
@@ -154,6 +155,7 @@ namespace Mechapp
 
             // Actions: collect from each part definition; repeat per part instance
             var allParts = EnumerateAllParts(template);
+            double stabilitySum = 0;
             foreach (var part in allParts)
             {
                 var name = part["name"]?.ToString();
@@ -168,8 +170,31 @@ namespace Mechapp
                         Description = ActionsManager.GetDescription(a)
                     });
                 }
+
+                // Sum Stability tags (prefer instance tags; fallback to definition)
+                // Prefer instance tags only if they are arrays; otherwise fallback to definition
+                List<string> tags;
+                if (part["Tags"] is JsonArray ja)
+                {
+                    tags = ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                }
+                else
+                {
+                    tags = PartManager.GetTagsForPartName(name!);
+                }
+                foreach (var tag in tags)
+                {
+                    var baseName = TagsManager.GetBaseName(tag);
+                    if (baseName.Equals("Stability", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        var val = TagsManager.GetNumericValue(tag);
+                        // If no numeric value provided, count as 1
+                        stabilitySum += val.HasValue ? val.Value : 1.0;
+                    }
+                }
             }
 
+            stats.CombinedStability = stabilitySum;
             return stats;
         }
 

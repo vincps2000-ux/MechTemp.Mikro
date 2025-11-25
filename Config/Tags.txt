@@ -12,5 +12,6 @@
   { "name": "Weapon", "description": "Offensive equipment capable of attacks." },
   { "name": "Energy generation", "description": "Power generation." },
   { "name": "Energy storage", "description": "Storage subsystem." },
-  { "name": "Energy drain", "description": "Drain Use of the Part causes." }
+  { "name": "Energy drain", "description": "Drain Use of the Part causes." },
+  { "name": "Stability", "description": "Prevents a mech from toppeling. Higher Weights need Higher Stability" }
 ]

@@ -253,16 +253,40 @@ namespace Templates
                 }
             }
 
-            // Copy additional properties from definition (won't override chosen Scale if definition lacks it)
+            // Copy additional properties from definition without stringifying arrays/objects
+            // Do not overwrite the previously determined Scale
             if (definition != null)
             {
                 foreach (var prop in PartManager.GetPartProperties(definition["type"]?.ToString() ?? ""))
                 {
-                    if (definition[prop] != null)
+                    if (string.Equals(prop, "Scale", System.StringComparison.OrdinalIgnoreCase))
+                        continue; // keep desiredScale
+
+                    var defProp = definition[prop];
+                    if (defProp == null)
+                        continue;
+
+                    // Copy arrays (e.g., Tags, Actions) properly
+                    if (defProp is JsonArray arr)
                     {
-                        // Create a new JsonNode with the value instead of reusing the existing one
-                        string valueStr = definition[prop]!.ToString();
-                        partToAdd[prop] = JsonValue.Create(valueStr);
+                        var newArr = new JsonArray();
+                        foreach (var item in arr)
+                        {
+                            var s = item?.ToString();
+                            if (!string.IsNullOrWhiteSpace(s))
+                                newArr.Add(s);
+                        }
+                        partToAdd[prop] = newArr;
+                    }
+                    else if (defProp is JsonObject obj)
+                    {
+                        // Shallow clone object by re-serializing
+                        partToAdd[prop] = JsonNode.Parse(obj.ToJsonString())!.AsObject();
+                    }
+                    else
+                    {
+                        // Primitive values
+                        partToAdd[prop] = JsonValue.Create(defProp.ToString());
                     }
                 }
             }

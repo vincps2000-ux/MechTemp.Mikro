@@ -169,8 +169,8 @@ namespace Mechapp
                         displayText += $" | {prop}: {propValue}";
                     }
                 }
-                // Also display Tags directly from definition if not copied into instance
-                if (parts[i]["Tags"] == null)
+                // Also display Tags from definition when instance tags are missing or not in array form
+                if (!(parts[i]["Tags"] is JsonArray))
                 {
                     var tags = PartManager.GetTagsForPartName(name);
                     if (tags.Count > 0)
@@ -253,6 +253,11 @@ namespace Mechapp
                     Console.WriteLine("=== Mech Stats ===\n");
                     Console.WriteLine($"Scale: {stats.Scale}");
                     Console.WriteLine($"Weight: {stats.Weight:F1} / {stats.WeightLimit}");
+                    Console.WriteLine($"Stability: {stats.CombinedStability:F1}");
+                    if (stats.CombinedStability > 0)
+                    {
+                        Console.WriteLine($"Weight per Stability: {(stats.Weight / stats.CombinedStability):F2}");
+                    }
                     Console.WriteLine("\nActions:");
                     if (stats.Actions.Count == 0)
                     {
@@ -280,9 +285,16 @@ namespace Mechapp
                         foreach (var p in partsList)
                         {
                             var pname = p["name"]?.ToString() ?? "Unnamed";
-                            var tags = p["Tags"] != null
-                                ? (p["Tags"] is JsonArray ja ? ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList() : new List<string> { p["Tags"]!.ToString() })
-                                : PartManager.GetTagsForPartName(pname);
+                            // Prefer instance tags only if they are arrays; otherwise fallback to definition
+                            List<string> tags;
+                            if (p["Tags"] is JsonArray ja)
+                            {
+                                tags = ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                            }
+                            else
+                            {
+                                tags = PartManager.GetTagsForPartName(pname);
+                            }
                             if (tags.Count > 0)
                             {
                                 Console.WriteLine($"- {pname}: {string.Join(", ", tags)}");
@@ -295,9 +307,15 @@ namespace Mechapp
                     foreach (var p in partsList)
                     {
                         var pname = p["name"]?.ToString() ?? "";
-                        var tags = p["Tags"] != null
-                            ? (p["Tags"] is JsonArray ja ? ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList() : new List<string> { p["Tags"]!.ToString() })
-                            : PartManager.GetTagsForPartName(pname);
+                        List<string> tags;
+                        if (p["Tags"] is JsonArray ja)
+                        {
+                            tags = ja.Select(x => x?.ToString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
+                        }
+                        else
+                        {
+                            tags = PartManager.GetTagsForPartName(pname);
+                        }
                         foreach (var tg in tags)
                         {
                             var baseName = Mechapp.TagsManager.GetBaseName(tg);

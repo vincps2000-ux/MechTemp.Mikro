@@ -37,9 +37,10 @@
   {"name": "Joint","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"30","WeightFormula":"Weight * Scale","Description":"Articulated joint for limbs."},
   {"name": "Connector","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"30","WeightFormula":"Weight * Scale","Description":"Connector for mech parts."},
   {"name": "Hand","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"20","WeightFormula":"Weight * Scale","Description":"Manipulative hand for mechs.","Actions":["Attack(Hand)"],"Tags":["Melee","Physical Damage"]},
-  {"name": "Foot","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"35","WeightFormula":"Weight * Scale","Description":"Foot for walking mechs.","Actions":["Attack(Kick)"],"Tags":["Melee","Physical Damage"]},
+  {"name": "Foot","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"35","WeightFormula":"Weight * Scale","Description":"Foot for walking mechs.","Actions":["Attack(Kick)"],"Tags":["Melee","Physical Damage","Stability(100)"]},
   {"name": "Turret","type":"extremity","dynamicScale":true,"MinScale":1,"Weight":"100","WeightFormula":"Weight * Scale","Description":"Rotating turret mount."},
   {"name": "Core","type":"extremity","dynamicScale":true,"MinScale":3,"Weight":"100","WeightFormula":"Weight * Scale","Description":"Central core for power and control."},
+  {"name": "Tank Thread","type":"extremity","dynamicScale":true,"MinScale":2,"Weight":"120","WeightFormula":"Weight * Scale","Description":"Tracked mobility system offering high stability.","Tags":["Stability(300)"]},
 
   {"name": "Fuel Generator","type":"Generator","Scale":"Vehicle(2)","dynamicScale":true,"MinScale":1,"Weight":"60","WeightFormula":"Weight * Scale","Description":"Internal combustion generator providing sustained power output.","Tags":["Energy generation(60)"]},
   {"name": "Reactor","type":"Generator","Scale":"House(3)","dynamicScale":true,"MinScale":3,"Weight":"200","WeightFormula":"Weight * Scale","Description":"High-output reactor core for large-scale mechs.","Tags":["Energy generation(200)"]},
